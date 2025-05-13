@@ -22,6 +22,19 @@ func main() {
 			"name": c.Param("name"),
 		})
 	})
+	v1 := r.Group("/group")
+	{
+		v1.GET("/11", func(c *gee.Context) {
+			c.JSON(http.StatusOK, gee.H{
+				"message": "v1/11",
+			})
+		})
+		v1.GET("/22", func(c *gee.Context) {
+			c.JSON(http.StatusOK, gee.H{
+				"message": "v1/22",
+			})
+		})
+	}
 
 	err := r.Run(":9999")
 	if err != nil {
