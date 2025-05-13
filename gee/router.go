@@ -21,7 +21,7 @@ func parsePattern(pattern string) []string {
 	// 拆分路径字符串
 	vs := strings.Split(pattern, "/")
 
-	parts := make([]string, len(vs))
+	parts := make([]string, 0)
 	for _, item := range vs {
 		if item != "" {
 			parts = append(parts, item)
@@ -34,8 +34,9 @@ func parsePattern(pattern string) []string {
 }
 
 func (router *router) addRoute(method string, pattern string, handler HandlerFunc) {
-	parts := parsePattern(pattern)
+	parts := parsePattern(pattern) // 拆分path给parts
 
+	// 给每个方法:GET,POST..分配一个前缀路由树
 	key := method + "-" + pattern
 	if _, ok := router.roots[method]; !ok {
 		router.roots[method] = &node{}
@@ -73,9 +74,11 @@ func (router *router) getRoute(method string, path string) (*node, map[string]st
 }
 
 func (router *router) handle(c *Context) {
-	key := c.Method + "-" + c.Path
-	if handler, ok := router.handlers[key]; ok {
-		handler(c)
+	n, params := router.getRoute(c.Method, c.Path)
+	if n != nil {
+		c.Params = params
+		key := c.Method + "-" + n.path
+		router.handlers[key](c)
 	} else {
 		c.String(http.StatusNotFound, "404 page not found")
 	}
